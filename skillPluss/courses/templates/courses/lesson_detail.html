@@ -1,0 +1,97 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}{{ lesson.title }} - {{ course.cname }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Main Content - Lesson -->
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'courses:home' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'courses:course_detail' course.course_id %}">{{ course.cname }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ lesson.title }}</li>
+                </ol>
+            </nav>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h1 class="h4 mb-0">{{ lesson.title }}</h1>
+                </div>
+                <div class="card-body">
+                    {% if lesson.video_url %}
+                    <div class="ratio ratio-16x9 mb-4">
+                        <iframe src="{{ lesson.video_url }}" allowfullscreen></iframe>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="lesson-content">
+                        {{ lesson.content|linebreaks }}
+                    </div>
+                    
+                    {% if lesson.resources.all %}
+                    <div class="mt-4">
+                        <h5>Lesson Resources</h5>
+                        <ul class="list-group">
+                            {% for resource in lesson.resources.all %}
+                            <li class="list-group-item">
+                                <a href="{{ resource.file.url }}" class="text-decoration-none" target="_blank">
+                                    <i class="fas fa-file me-2"></i>{{ resource.filename }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Navigation Controls -->
+            <div class="d-flex justify-content-between mb-4">
+                {% if prev_lesson %}
+                <a href="{% url 'courses:view_lesson' course.course_id prev_lesson.id %}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Previous Lesson
+                </a>
+                {% else %}
+                <button class="btn btn-outline-secondary" disabled>
+                    <i class="fas fa-arrow-left me-2"></i>Previous Lesson
+                </button>
+                {% endif %}
+                
+                {% if next_lesson %}
+                <a href="{% url 'courses:view_lesson' course.course_id next_lesson.id %}" class="btn btn-primary">
+                    Next Lesson<i class="fas fa-arrow-right ms-2"></i>
+                </a>
+                {% else %}
+                <a href="{% url 'courses:course_detail' course.course_id %}" class="btn btn-success">
+                    <i class="fas fa-check-circle me-2"></i>Complete Course
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Sidebar - Lesson List -->
+        <div class="col-md-4">
+            <div class="card sticky-top" style="top: 2rem;">
+                <div class="card-header">
+                    <h5 class="mb-0">Course Lessons</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for l in all_lessons %}
+                        <a href="{% url 'courses:view_lesson' course.course_id l.id %}" 
+                           class="list-group-item list-group-item-action {% if l.id == lesson.id %}active{% endif %}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>{{ l.title }}</span>
+                                <span class="badge bg-primary rounded-pill">{{ forloop.counter }}</span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

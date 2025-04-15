@@ -1,0 +1,227 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Manage Lessons - {{ course.cname }} - SkillPluss+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'courses:instructor_dashboard' %}">My Courses</a></li>
+            <li class="breadcrumb-item active">{{ course.cname }}</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Manage Lessons</h1>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLessonModal">
+            <i class="fas fa-plus-circle me-2"></i>Add Lesson
+        </button>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Lesson Title</th>
+                            <th>Duration</th>
+                            <th>Type</th>
+                            <th style="width: 150px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="sortable">
+                        {% for lesson in lessons %}
+                        <tr data-lesson-id="{{ lesson.id }}">
+                            <td>
+                                <i class="fas fa-grip-vertical text-muted"></i>
+                                {{ forloop.counter }}
+                            </td>
+                            <td>{{ lesson.title }}</td>
+                            <td>{{ lesson.duration }} min</td>
+                            <td>
+                                <span class="badge bg-{{ lesson.type_color }}">
+                                    <i class="fas fa-{{ lesson.type_icon }} me-1"></i>
+                                    {{ lesson.get_type_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editLesson{{ lesson.id }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteLesson{{ lesson.id }}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4">
+                                <i class="fas fa-book fa-2x text-muted mb-2"></i>
+                                <p class="mb-0">No lessons added yet</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Lesson Modal -->
+<div class="modal fade" id="addLessonModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Lesson</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'courses:add_lesson' course.course_id %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Lesson Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="type" class="form-label">Lesson Type</label>
+                            <select class="form-select" id="type" name="type" required>
+                                <option value="video">Video Lesson</option>
+                                <option value="text">Text Content</option>
+                                <option value="quiz">Quiz</option>
+                                <option value="assignment">Assignment</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="duration" class="form-label">Duration (minutes)</label>
+                            <input type="number" class="form-control" id="duration" name="duration" min="1" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Content</label>
+                        <div class="content-type video-content">
+                            <input type="text" class="form-control" name="video_url" placeholder="YouTube or Vimeo URL">
+                        </div>
+                        <div class="content-type text-content d-none">
+                            <textarea class="form-control" name="text_content" rows="5" placeholder="Enter lesson content here..."></textarea>
+                        </div>
+                        <div class="content-type quiz-content d-none">
+                            <textarea class="form-control" name="quiz_questions" rows="5" placeholder="Enter quiz questions (one per line)..."></textarea>
+                        </div>
+                        <div class="content-type assignment-content d-none">
+                            <textarea class="form-control" name="assignment_details" rows="5" placeholder="Enter assignment details..."></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="resources" class="form-label">Additional Resources</label>
+                        <input type="file" class="form-control" id="resources" name="resources" multiple>
+                        <div class="form-text">Upload PDFs, documents, or other supplementary materials</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Lesson</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% for lesson in lessons %}
+<!-- Edit Lesson Modal -->
+<div class="modal fade" id="editLesson{{ lesson.id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Lesson</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'courses:edit_lesson' course.course_id lesson.id %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <!-- Similar fields as Add Lesson form, but with lesson's current values -->
+                    <div class="mb-3">
+                        <label for="edit_title_{{ lesson.id }}" class="form-label">Lesson Title</label>
+                        <input type="text" class="form-control" id="edit_title_{{ lesson.id }}" name="title" value="{{ lesson.title }}" required>
+                    </div>
+                    <!-- Add other fields similarly -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Lesson Modal -->
+<div class="modal fade" id="deleteLesson{{ lesson.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Lesson</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong>{{ lesson.title }}</strong>?</p>
+                <p class="text-danger mb-0">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{% url 'courses:delete_lesson' course.course_id lesson.id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Lesson</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% block extra_js %}
+<script>
+document.getElementById('type').addEventListener('change', function() {
+    const contentTypes = document.querySelectorAll('.content-type');
+    contentTypes.forEach(el => el.classList.add('d-none'));
+    
+    const selectedType = this.value + '-content';
+    document.querySelector('.' + selectedType).classList.remove('d-none');
+});
+
+// Initialize sortable for drag-and-drop lesson reordering
+new Sortable(document.querySelector('.sortable'), {
+    handle: '.fa-grip-vertical',
+    animation: 150,
+    onEnd: function(evt) {
+        // Send new order to server
+        const lessonIds = Array.from(evt.to.children).map(el => el.dataset.lessonId);
+        fetch('{% url "courses:reorder_lessons" course.course_id %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({ lesson_order: lessonIds })
+        });
+    }
+});
+</script>
+{% endblock %}
+{% endblock %} 

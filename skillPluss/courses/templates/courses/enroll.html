@@ -1,0 +1,66 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Enroll in {{ course.cname }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Course Enrollment</h2>
+                    
+                    <div class="course-details mb-4">
+                        <h3>{{ course.cname }}</h3>
+                        <p class="text-muted">{{ course.description }}</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-primary">{{ course.category.name }}</span>
+                                {% if course.level %}
+                                <span class="badge bg-secondary">{{ course.level }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="text-end">
+                                <h4 class="mb-0">
+                                    {% if course.fee > 0 %}
+                                    <span class="text-primary">₹{{ course.fee }}</span>
+                                    {% else %}
+                                    <span class="text-success">Free</span>
+                                    {% endif %}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="enrollment-action text-center">
+                        <form method="post">
+                            {% csrf_token %}
+                            {% if course.fee > 0 %}
+                            <p class="mb-3">Click below to proceed with payment and enroll in this course.</p>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Proceed to Payment
+                            </button>
+                            {% else %}
+                            <p class="mb-3">This is a free course. Click below to enroll now.</p>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                Enroll Now
+                            </button>
+                            {% endif %}
+                        </form>
+                    </div>
+
+                    <div class="course-info mt-4">
+                        <h4>Course Information</h4>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-clock me-2"></i>Duration: {{ course.duration }} days</li>
+                            <li><i class="fas fa-user me-2"></i>Instructor: {{ course.instructor.get_full_name|default:course.instructor.username }}</li>
+                            <li><i class="fas fa-star me-2 text-warning"></i>Rating: {{ course.average_rating|floatformat:1 }} ({{ course.total_ratings }} reviews)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

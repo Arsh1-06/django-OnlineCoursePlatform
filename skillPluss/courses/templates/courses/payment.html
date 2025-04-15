@@ -1,0 +1,98 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Payment for {{ course.cname }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Complete Payment</h2>
+                    
+                    <div class="order-summary mb-4">
+                        <h4>Order Summary</h4>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <h5 class="mb-1">{{ course.cname }}</h5>
+                                        <span class="text-muted">{{ course.category.name }}</span>
+                                    </div>
+                                    <h4 class="text-primary mb-0">₹{{ course.fee }}</h4>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <strong>Total Amount</strong>
+                                    <h4 class="text-primary mb-0">₹{{ course.fee }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="payment-form">
+                        <h4>Payment Details</h4>
+                        <form method="post" id="payment-form">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="card-number" class="form-label">Card Number</label>
+                                <input type="text" class="form-control" id="card-number" placeholder="1234 5678 9012 3456" required>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="expiry" class="form-label">Expiry Date</label>
+                                    <input type="text" class="form-control" id="expiry" placeholder="MM/YY" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="cvv" class="form-label">CVV</label>
+                                    <input type="text" class="form-control" id="cvv" placeholder="123" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="card-name" class="form-label">Name on Card</label>
+                                <input type="text" class="form-control" id="card-name" placeholder="John Doe" required>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    Pay ₹{{ course.fee }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="secure-payment-info text-center mt-4">
+                        <p class="text-muted">
+                            <i class="fas fa-lock me-2"></i>
+                            Your payment information is secure. We use industry-standard encryption to protect your data.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('payment-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    // Here you would typically integrate with a payment gateway
+    // For now, we'll just show a success message and redirect
+    alert('Payment successful! You are now enrolled in the course.');
+    window.location.href = "{% url 'courses:course_detail' course_id=course.course_id %}";
+});
+
+// Basic form validation
+document.getElementById('card-number').addEventListener('input', function(e) {
+    this.value = this.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
+});
+
+document.getElementById('expiry').addEventListener('input', function(e) {
+    this.value = this.value.replace(/[^\d]/g, '').replace(/^(\d{2})(\d{0,2})/, '$1/$2').trim();
+});
+
+document.getElementById('cvv').addEventListener('input', function(e) {
+    this.value = this.value.replace(/[^\d]/g, '').slice(0, 3);
+});
+</script>
+{% endblock %} 

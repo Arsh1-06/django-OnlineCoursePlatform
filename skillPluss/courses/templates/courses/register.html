@@ -1,0 +1,127 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Register - SkillPluss+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5">
+                    <h1 class="text-center mb-4">Create Account</h1>
+                    
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="role" class="form-label d-flex align-items-center">
+                                I want to
+                                <button type="button" class="btn btn-link text-primary p-0 ms-2" data-bs-toggle="modal" data-bs-target="#roleInfoModal">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </label>
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="" selected disabled>Select your role</option>
+                                <option value="student">Learn - Register as Student</option>
+                                <option value="instructor">Teach - Register as Instructor</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password1" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password1" name="password1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password2" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="password2" name="password2" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="profile_pic" class="form-label">Profile Picture (Optional)</label>
+                            <input type="file" class="form-control" id="profile_pic" name="profile_pic" accept="image/*">
+                        </div>
+                        <div class="mb-3">
+                            <label for="bio" class="form-label">Bio (Optional)</label>
+                            <textarea class="form-control" id="bio" name="bio" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mb-3">Create Account</button>
+                    </form>
+                </div>
+                <div class="card-footer bg-light text-center py-3">
+                    Already have an account? <a href="{% url 'courses:login' %}">Login here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Role Information Modal -->
+<div class="modal fade" id="roleInfoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Choose Your Role</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <h6 class="d-flex align-items-center">
+                        <i class="fas fa-graduation-cap me-2"></i>
+                        Student
+                    </h6>
+                    <ul class="list-unstyled ms-4">
+                        <li><i class="fas fa-check text-success me-2"></i>Access all courses</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Track your progress</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Rate and review courses</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Get certificates</li>
+                    </ul>
+                </div>
+                <div>
+                    <h6 class="d-flex align-items-center">
+                        <i class="fas fa-chalkboard-teacher me-2"></i>
+                        Instructor
+                    </h6>
+                    <ul class="list-unstyled ms-4">
+                        <li><i class="fas fa-check text-success me-2"></i>Create and publish courses</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Manage your content</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Interact with students</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Earn from your courses</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

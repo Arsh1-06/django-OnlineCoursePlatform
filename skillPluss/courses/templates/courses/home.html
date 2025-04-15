@@ -1,0 +1,98 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Welcome to SkillPluss+{% endblock %}
+
+{% block content %}
+<div class="hero-section bg-dark text-white py-5 mb-5" style="min-height: 60vh; display: flex; align-items: center;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h1 class="display-4 mb-4 fw-bold">Welcome to SkillPluss+</h1>
+                <p class="lead mb-4">Your gateway to professional growth. Choose from our wide range of courses and start learning today.</p>
+                <div class="mt-4">
+                    <a href="{% url 'courses:course_list' %}" class="btn btn-primary btn-lg me-3">Browse Courses</a>
+                    <a href="{% url 'courses:pricing' %}" class="btn btn-outline-light btn-lg">View Plans</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h2 class="mb-4">Top Categories</h2>
+    <div class="row">
+        {% for category in categories %}
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 shadow-sm hover-card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ category.name }}</h5>
+                    <p class="card-text text-muted">{{ category.description|truncatewords:15 }}</p>
+                    <a href="{% url 'courses:course_list' %}?category={{ category.id }}" class="btn btn-outline-purple mt-auto">Browse Courses</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if featured_courses %}
+    <h2 class="mb-4 mt-5">Featured Courses</h2>
+    <div class="row">
+        {% for course in featured_courses %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if course.image %}
+                <img src="{{ course.image.url }}" class="card-img-top" alt="{{ course.cname }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ course.cname }}</h5>
+                    <p class="card-text">{{ course.description|truncatewords:20 }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-primary">${{ course.fee }}</span>
+                        <div>
+                            {% if course.average_rating %}
+                            <span class="text-warning">
+                                <i class="fas fa-star"></i> {{ course.average_rating|floatformat:1 }}
+                            </span>
+                            <small class="text-muted">({{ course.total_ratings }})</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{% url 'courses:course_detail' course_id=course.course_id %}" class="btn btn-outline-purple w-100">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #6f42c1 0%, #6610f2 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.hover-card {
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+
+.btn-outline-purple {
+    color: #6f42c1;
+    border-color: #6f42c1;
+}
+
+.btn-outline-purple:hover {
+    color: #fff;
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+}
+</style>
+{% endblock %} 

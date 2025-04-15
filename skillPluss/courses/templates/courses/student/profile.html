@@ -1,0 +1,89 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Student Profile - {{ user.get_full_name|default:user.username }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Profile Information -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if user.userprofile.profile_pic %}
+                        <img src="{{ user.userprofile.profile_pic.url }}" alt="Profile Picture" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 150px; height: 150px;">
+                            <i class="fas fa-user-circle fa-5x text-secondary"></i>
+                        </div>
+                    {% endif %}
+                    <h3 class="card-title mb-0">{{ user.get_full_name|default:user.username }}</h3>
+                    <p class="text-muted">Student</p>
+                    <div class="border-top pt-3 mt-3">
+                        <p class="mb-1"><i class="fas fa-envelope me-2"></i>{{ user.email }}</p>
+                        {% if user.userprofile.bio %}
+                            <p class="mb-0"><small>{{ user.userprofile.bio }}</small></p>
+                        {% endif %}
+                        <div class="mt-3">
+                            <a href="{% url 'courses:edit_profile' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-user-edit me-1"></i>Edit Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enrolled Courses Section -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">My Learning</h5>
+                </div>
+                <div class="card-body">
+                    {% if enrolled_courses %}
+                        <div class="row">
+                            {% for course in enrolled_courses %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100">
+                                        {% if course.image %}
+                                            <img src="{{ course.image.url }}" class="card-img-top" alt="{{ course.cname }}" style="height: 140px; object-fit: cover;">
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ course.cname }}</h6>
+                                            <p class="card-text small text-muted mb-2">{{ course.description|truncatewords:15 }}</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge bg-primary">{{ course.category.name }}</span>
+                                                <small class="text-muted">
+                                                    {% if course.average_rating %}
+                                                        <i class="fas fa-star text-warning"></i> {{ course.average_rating|floatformat:1 }}
+                                                    {% else %}
+                                                        No ratings
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <a href="{% url 'courses:course_detail' course.course_id %}" class="btn btn-outline-primary btn-sm w-100">
+                                                <i class="fas fa-play-circle me-1"></i>Continue Learning
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-graduation-cap fa-3x text-muted mb-3"></i>
+                            <h5>No courses enrolled yet</h5>
+                            <p class="text-muted mb-3">Start your learning journey today!</p>
+                            <a href="{% url 'courses:course_list' %}" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Browse Courses
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

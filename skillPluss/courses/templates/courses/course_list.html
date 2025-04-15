@@ -1,0 +1,129 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Courses{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Search and Filter Section -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <form class="d-flex" method="GET">
+                <input type="text" name="search" class="form-control me-2" placeholder="Search courses..." value="{{ search_query }}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <select class="form-select" name="category" onchange="this.form.submit()">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if selected_category == category.id %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!-- Courses Grid -->
+    <div class="row">
+        {% if courses %}
+            {% for course in courses %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm hover-shadow">
+                        <!-- Course Image -->
+                        <div class="position-relative">
+                            {% if course.image %}
+                                <img src="{{ course.image.url }}" class="card-img-top" alt="{{ course.cname }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-book fa-3x text-secondary"></i>
+                                </div>
+                            {% endif %}
+                            {% if course.fee > 0 %}
+                                <div class="position-absolute top-0 end-0 m-2">
+                                    <span class="badge bg-primary fs-6">₹{{ course.fee }}</span>
+                                </div>
+                            {% else %}
+                                <div class="position-absolute top-0 end-0 m-2">
+                                    <span class="badge bg-success fs-6">Free</span>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="card-body d-flex flex-column">
+                            <!-- Course Category -->
+                            <div class="mb-2">
+                                <span class="badge bg-light text-primary">{{ course.category.name }}</span>
+                                {% if course.level %}
+                                    <span class="badge bg-light text-secondary">{{ course.level }}</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Course Title -->
+                            <h5 class="card-title mb-2">
+                                <a href="{% url 'courses:course_detail' course.course_id %}" class="text-decoration-none text-dark">
+                                    {{ course.cname }}
+                                </a>
+                            </h5>
+
+                            <!-- Course Description -->
+                            <p class="card-text text-muted small mb-3">{{ course.description|truncatewords:15 }}</p>
+
+                            <!-- Instructor Info -->
+                            <div class="d-flex align-items-center mb-3">
+                                {% if course.instructor and course.instructor.userprofile.profile_pic %}
+                                    <img src="{{ course.instructor.userprofile.profile_pic.url }}" alt="Instructor" class="rounded-circle me-2" style="width: 30px; height: 30px; object-fit: cover;">
+                                {% else %}
+                                    <i class="fas fa-user-circle fa-2x me-2 text-secondary"></i>
+                                {% endif %}
+                                <small class="text-muted">
+                                    {% if course.instructor %}
+                                        {{ course.instructor.get_full_name|default:course.instructor.username }}
+                                    {% else %}
+                                        No instructor assigned
+                                    {% endif %}
+                                </small>
+                            </div>
+
+                            <!-- Course Stats -->
+                            <div class="d-flex justify-content-between mt-auto">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <i class="fas fa-star text-warning"></i>
+                                        <small class="text-muted">{{ course.average_rating|default:"New" }}</small>
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-users text-muted"></i>
+                                        <small class="text-muted">{{ course.total_enrolled|default:0 }}</small>
+                                    </div>
+                                </div>
+                                <a href="{% url 'courses:course_detail' course.course_id %}" class="btn btn-sm btn-outline-primary">
+                                    Learn More
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4>No courses found</h4>
+                <p class="text-muted">Try adjusting your search or filter criteria</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+.hover-shadow:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+</style>
+{% endblock %} 

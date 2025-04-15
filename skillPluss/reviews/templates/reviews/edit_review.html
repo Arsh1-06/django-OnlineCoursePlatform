@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Review - {{ course.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .star-rating {
+        font-size: 24px;
+        cursor: pointer;
+    }
+    .star-rating .star {
+        color: #ddd;
+        transition: color 0.2s;
+    }
+    .star-rating .star.active {
+        color: #ffd700;
+    }
+    .review-form {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    .review-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    .comment-area {
+        min-height: 150px;
+        resize: vertical;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="review-form">
+        <h2 class="mb-4">Edit Your Review for "{{ course.name }}"</h2>
+        
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'reviews:edit_review' course.id review.id %}">
+            {% csrf_token %}
+            
+            <div class="mb-4">
+                <label class="form-label">Rating:</label>
+                <div class="star-rating" id="starRating">
+                    {% for i in "12345" %}
+                    <span class="star {% if review.rating >= forloop.counter %}active{% endif %}" data-rating="{{ forloop.counter }}">★</span>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="rating" id="ratingInput" value="{{ review.rating }}">
+            </div>
+
+            <div class="mb-4">
+                <label for="comment" class="form-label">Your Review:</label>
+                <textarea class="form-control comment-area" id="comment" name="comment" required>{{ review.comment }}</textarea>
+            </div>
+
+            <div class="review-actions">
+                <a href="{% url 'courses:course_detail' course.id %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Update Review</button>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    Delete Review
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete your review? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{% url 'reviews:delete_review' course.id review.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Review</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const stars = document.querySelectorAll('.star');
+    const ratingInput = document.getElementById('ratingInput');
+
+    // Handle star hover effects
+    stars.forEach(star => {
+        star.addEventListener('mouseover', function() {
+            const rating = this.dataset.rating;
+            stars.forEach(s => {
+                if (s.dataset.rating <= rating) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+        });
+    });
+
+    // Handle star click
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = this.dataset.rating;
+            ratingInput.value = rating;
+            stars.forEach(s => {
+                if (s.dataset.rating <= rating) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+        });
+    });
+
+    // Reset stars on mouse leave
+    document.querySelector('.star-rating').addEventListener('mouseleave', function() {
+        const currentRating = ratingInput.value;
+        stars.forEach(star => {
+            if (star.dataset.rating <= currentRating) {
+                star.classList.add('active');
+            } else {
+                star.classList.remove('active');
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 
