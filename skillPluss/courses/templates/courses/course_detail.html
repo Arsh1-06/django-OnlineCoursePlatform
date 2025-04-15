@@ -14,21 +14,6 @@
     </div>
     {% endif %}
     
-    {% if user.is_authenticated %}
-    <div class="alert alert-info">
-        <p><strong>Debug Info:</strong></p>
-        <ul>
-            <li>User: {{ user.email }}</li>
-            <li>Is Enrolled: {{ is_enrolled }}</li>
-            <li>Course ID: {{ course.course_id }}</li>
-            <li>User ID: {{ user.id }}</li>
-            <li>Course Name: {{ course.cname }}</li>
-            <li>Course Fee: {{ course.fee }}</li>
-            <li>Course Status: {{ course.status }}</li>
-        </ul>
-    </div>
-    {% endif %}
-    
     <div class="row">
         <!-- Left Column - Course Information -->
         <div class="col-md-8">
@@ -153,7 +138,7 @@
                     <h3 class="h5 mb-0">Student Reviews</h3>
                     {% if user.is_authenticated %}
                         {% if is_enrolled %}
-                        <a href="{% url 'reviews:add_review' course.id %}" class="btn btn-primary btn-sm">
+                        <a href="{% url 'reviews:add_review' course.course_id %}" class="btn btn-primary btn-sm">
                             Write a Review
                         </a>
                         {% endif %}

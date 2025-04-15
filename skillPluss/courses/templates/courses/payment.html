@@ -32,11 +32,12 @@
 
                     <div class="payment-form">
                         <h4>Payment Details</h4>
-                        <form method="post" id="payment-form">
+                        <form id="payment-form" method="post">
                             {% csrf_token %}
+                            <input type="hidden" name="payment_completed" value="true">
                             <div class="mb-3">
                                 <label for="card-number" class="form-label">Card Number</label>
-                                <input type="text" class="form-control" id="card-number" placeholder="1234 5678 9012 3456" required>
+                                <input type="text" class="form-control" id="card-number" name="card_number" placeholder="1234 5678 9012 3456" required>
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
@@ -76,10 +77,47 @@
 <script>
 document.getElementById('payment-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    // Here you would typically integrate with a payment gateway
-    // For now, we'll just show a success message and redirect
-    alert('Payment successful! You are now enrolled in the course.');
-    window.location.href = "{% url 'courses:course_detail' course_id=course.course_id %}";
+    
+    // Get form data
+    const formData = new FormData(this);
+    
+    // Submit the form to the direct_enroll endpoint
+    fetch("{% url 'courses:direct_enroll' course_id=course.course_id %}", {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Accept': 'application/json'
+        },
+        credentials: 'same-origin',
+        body: formData
+    })
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url;
+            return;
+        }
+        if (response.ok) {
+            // Show success message
+            const successMessage = document.createElement('div');
+            successMessage.className = 'alert alert-success';
+            successMessage.innerHTML = '<i class="fas fa-check-circle"></i> Payment successful! You are now enrolled in the course.';
+            document.querySelector('.card-body').insertBefore(successMessage, document.querySelector('.secure-payment-info'));
+            
+            // Redirect after a short delay
+            setTimeout(() => {
+                window.location.href = "{% url 'courses:course_detail' course_id=course.course_id %}";
+            }, 2000);
+        } else {
+            throw new Error('Enrollment failed');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'alert alert-danger';
+        errorMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> An error occurred. Please try again.';
+        document.querySelector('.card-body').insertBefore(errorMessage, document.querySelector('.secure-payment-info'));
+    });
 });
 
 // Basic form validation

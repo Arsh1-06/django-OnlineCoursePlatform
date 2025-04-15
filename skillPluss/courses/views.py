@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .models import Course, Category, Lesson, Student, Rating, UserProfile, LessonResource
+from .models import Course, Category, Lesson, Student, Rating, UserProfile, LessonResource, CompletedLesson
 from django.http import JsonResponse, HttpResponseRedirect
 import json
 from django.contrib.admin.views.decorators import staff_member_required
@@ -411,7 +411,29 @@ def user_profile(request):
             'courses': courses
         })
     else:
-        enrolled_courses = user.student_set.first().courses.all() if hasattr(user, 'student_set') and user.student_set.exists() else []
+        # Get or create student profile
+        try:
+            student = Student.objects.get(email=user.email)
+        except Student.DoesNotExist:
+            student = Student.objects.create(
+                email=user.email,
+                name=user.get_full_name() or user.username,
+                gender='O',
+                qualification=''
+            )
+        
+        enrolled_courses = student.courses.all()
+        
+        # Calculate progress for each course
+        for course in enrolled_courses:
+            total_lessons = course.lessons.count()
+            completed_lessons = student.completed_lessons.filter(lesson__course=course)
+            completed_count = completed_lessons.count()
+            
+            course.total_lessons_count = total_lessons
+            course.completed_lessons_count = completed_count
+            course.progress_percentage = (completed_count / total_lessons * 100) if total_lessons > 0 else 0
+        
         return render(request, 'courses/student/profile.html', {
             'user': user,
             'enrolled_courses': enrolled_courses
@@ -637,13 +659,13 @@ def view_lesson(request, course_id, lesson_id):
         # Check if the course is in the student's courses
         is_enrolled = student.courses.filter(course_id=course.course_id).exists()
         
-        # Debug message to help troubleshoot
-        print(f"User: {request.user.email}, Is Enrolled: {is_enrolled}")
-        print(f"Student courses: {[c.course_id for c in student.courses.all()]}")
-        
         if not is_enrolled:
             messages.error(request, 'You must be enrolled in this course to access lessons.')
             return redirect('courses:course_detail', course_id=course_id)
+            
+        # Mark lesson as completed
+        CompletedLesson.objects.get_or_create(student=student, lesson=lesson)
+            
     except Student.DoesNotExist:
         messages.error(request, 'You must be enrolled in this course to access lessons.')
         return redirect('courses:course_detail', course_id=course_id)
@@ -675,68 +697,59 @@ def view_lesson(request, course_id, lesson_id):
 def direct_enroll(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
     
-    # Debug information
-    print(f"Direct enroll called for course: {course.cname} (ID: {course.course_id})")
-    print(f"User: {request.user.email}")
-    print(f"Request method: {request.method}")
-    
     # Only process enrollment for POST requests
     if request.method != 'POST':
-        print("Not a POST request, redirecting to course detail")
         return redirect('courses:course_detail', course_id=course.course_id)
     
     # Check if user is already enrolled
     try:
         student = Student.objects.get(email=request.user.email)
-        print(f"Found existing student: {student.name} (ID: {student.id})")
-        
         if student.courses.filter(course_id=course.course_id).exists():
-            print(f"Student already enrolled in course: {course.cname}")
             messages.warning(request, 'You are already enrolled in this course!')
             return redirect('courses:course_detail', course_id=course.course_id)
-        else:
-            print(f"Student not enrolled in course: {course.cname}")
     except Student.DoesNotExist:
         # Create a new student if one doesn't exist
-        print(f"Creating new student for user: {request.user.email}")
         student = Student.objects.create(
             email=request.user.email,
             name=request.user.get_full_name() or request.user.username,
             gender='O',  # Default to 'Other'
             qualification=''  # Empty by default
         )
-        print(f"Created new student: {student.name} (ID: {student.id})")
     
     # Handle payment logic
     if course.fee > 0:
-        # For now, just show a success message
-        # In production, integrate with a payment gateway
-        print(f"Course requires payment: {course.fee}")
-        messages.info(request, f'Please complete the payment of ₹{course.fee} to access the course.')
-        return render(request, 'courses/payment.html', {
-            'course': course,
-            'student': student
-        })
+        # Check if this is a payment completion request
+        if request.POST.get('payment_completed') == 'true':
+            try:
+                # Add the course to the student's courses
+                student.courses.add(course)
+                student.save()
+                
+                # Return JSON response for AJAX request
+                if request.headers.get('Accept') == 'application/json':
+                    return JsonResponse({
+                        'status': 'success',
+                        'message': f'Successfully enrolled in {course.cname}!'
+                    })
+                
+                messages.success(request, f'Successfully enrolled in {course.cname}!')
+                return redirect('courses:course_detail', course_id=course.course_id)
+            except Exception as e:
+                if request.headers.get('Accept') == 'application/json':
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': str(e)
+                    }, status=500)
+                messages.error(request, f'Error enrolling in course: {str(e)}')
+                return redirect('courses:course_detail', course_id=course.course_id)
+        else:
+            # Show payment page
+            return render(request, 'courses/payment.html', {
+                'course': course,
+                'student': student
+            })
     else:
         # If course is free, enroll directly
-        print(f"Enrolling student in free course: {course.cname}")
-        
-        # Add the course to the student's courses
         student.courses.add(course)
-        
-        # Force a refresh from the database
-        student.refresh_from_db()
-        
-        # Verify enrollment
-        is_enrolled = student.courses.filter(course_id=course.course_id).exists()
-        print(f"Enrollment verification: {is_enrolled}")
-        print(f"Student courses after enrollment: {[c.course_id for c in student.courses.all()]}")
-        
-        if is_enrolled:
-            messages.success(request, f'Successfully enrolled in {course.cname}!')
-            # Use HttpResponseRedirect to ensure a proper redirect
-            from django.http import HttpResponseRedirect
-            return HttpResponseRedirect(f'/courses/course/{course.course_id}/')
-        else:
-            messages.error(request, f'Failed to enroll in {course.cname}. Please try again.')
-            return redirect('courses:course_detail', course_id=course.course_id)
+        messages.success(request, f'Successfully enrolled in {course.cname}!')
+        return redirect('courses:course_detail', course_id=course.course_id)

@@ -131,3 +131,15 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.role}"
+
+class CompletedLesson(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='completed_lessons')
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'lesson')
+        ordering = ['-completed_at']
+
+    def __str__(self):
+        return f"{self.student.name} - {self.lesson.title}"

@@ -5,9 +5,9 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Review(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='reviews')
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='reviews')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='reviews', null=True, blank=True)
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
-    review = models.TextField()
+    review = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -16,4 +16,4 @@ class Review(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.student.name}'s review for {self.course.cname}" 
+        return f"{self.student.name if self.student else 'Anonymous'}'s review for {self.course.cname}" 
