@@ -10,18 +10,18 @@ import json
 from django.contrib.admin.views.decorators import staff_member_required
 
 def home(request):
-    categories = Category.objects.all()[:8]  # Show top 8 categories
-    featured_courses = Course.objects.filter(average_rating__gte=4.0).order_by('-total_ratings')[:6]  # Show top 6 rated courses
+    categories = Category.objects.all()[:8]  
+    featured_courses = Course.objects.filter(average_rating__gte=4.0).order_by('-total_ratings')[:6] 
     return render(request, 'courses/home.html', {
         'categories': categories,
         'featured_courses': featured_courses
     })
 
 def course_list(request):
-    courses = Course.objects.filter(instructor__isnull=False)  # Only get courses with instructors
+    courses = Course.objects.filter(instructor__isnull=False)  
     categories = Category.objects.all()
     
-    # Search functionality
+
     search_query = request.GET.get('search', '')
     if search_query:
         courses = courses.filter(
@@ -66,19 +66,15 @@ def course_detail(request, course_id):
             print(f"Course fee: {course.fee}")
             print(f"Course status: {course.status}")
             
-            # Force a refresh of the student object to ensure we have the latest data
             student.refresh_from_db()
             
-            # Check enrollment status again after refresh
             is_enrolled = student.courses.filter(course_id=course.course_id).exists()
             print(f"Enrollment status after refresh: {is_enrolled}")
             print(f"Student courses after refresh: {[c.course_id for c in student.courses.all()]}")
         except Student.DoesNotExist:
-            # If student doesn't exist, they're not enrolled
             print(f"Student does not exist for user: {request.user.email}")
             pass
     
-    # Create the context with all necessary data
     context = {
         'course': course,
         'ratings': ratings,
@@ -753,3 +749,9 @@ def direct_enroll(request, course_id):
         student.courses.add(course)
         messages.success(request, f'Successfully enrolled in {course.cname}!')
         return redirect('courses:course_detail', course_id=course.course_id)
+
+def about(request):
+    """
+    View for the About Us page
+    """
+    return render(request, 'courses/about.html')

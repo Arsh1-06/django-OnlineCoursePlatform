@@ -1,0 +1,396 @@
+{% extends 'courses/base.html' %}
+{% load static %}
+
+{% block title %}About Us - SkillPluss{% endblock %}
+
+{% block content %}
+<div class="about-page">
+    <!-- Hero Section -->
+    <div class="about-hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="hero-title">Transforming Education for a Better Tomorrow</h1>
+                    <p class="hero-text">At SkillPluss, we're dedicated to revolutionizing online education. Our mission is to empower individuals with the knowledge and skills they need to succeed in today's rapidly evolving world.</p>
+                    <div class="hero-stats d-flex gap-4 mt-5">
+                        <div class="stat-item">
+                            <h3 class="stat-number">98%</h3>
+                            <p class="stat-label">Success Rate</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3 class="stat-number">50K+</h3>
+                            <p class="stat-label">Students</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3 class="stat-number">200+</h3>
+                            <p class="stat-label">Expert Mentors</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="hero-visual">
+                        <div class="floating-badge badge1">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="floating-badge badge2">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <div class="floating-badge badge3">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <div class="logo-circle">
+                            <img src="{% static 'courses/images/aboutUsimage.png' %}" alt="SkillPluss" class="circle-logo">
+                            <!-- <p class="circle-text">Education for Everyone</p> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mission Section -->
+    <section class="mission-section">
+        <div class="container">
+            <div class="row justify-content-center text-center">
+                <div class="col-lg-8">
+                    <h2 class="section-title">Our Vision & Mission</h2>
+                    <p class="section-description">To create a world where quality education is accessible to everyone, everywhere. We believe in the power of learning to transform lives and create positive change in the world.</p>
+                </div>
+            </div>
+            <div class="row mt-5">
+                <div class="col-md-4">
+                    <div class="mission-card">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3>Quality Education</h3>
+                        <p>Industry-leading courses designed by experts to ensure the highest learning standards and practical skills development.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mission-card">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>Community Learning</h3>
+                        <p>A supportive global community where students collaborate, share insights, and grow together through peer learning.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mission-card">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <h3>Career Growth</h3>
+                        <p>Focused on delivering real-world skills that drive career advancement and professional success.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="values-section">
+        <div class="container">
+            <h2 class="section-title text-center">Our Core Values</h2>
+            <div class="row mt-5">
+                <div class="col-lg-3 col-md-6">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h4>Passion</h4>
+                        <p>We're passionate about education and its power to transform lives.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h4>Innovation</h4>
+                        <p>Constantly innovating to provide the best learning experience.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <h4>Integrity</h4>
+                        <p>Maintaining the highest standards of integrity in everything we do.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <h4>Excellence</h4>
+                        <p>Striving for excellence in education and student success.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+.about-page {
+    overflow-x: hidden;
+}
+
+.about-hero {
+    background-color: #8A63D2;
+    padding: 6rem 0;
+    margin-bottom: 4rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+}
+
+.hero-text {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+}
+
+.hero-stats {
+    display: flex;
+    gap: 3rem;
+}
+
+.stat-item {
+    text-align: left;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 1rem;
+    opacity: 0.8;
+    margin: 0;
+}
+
+.hero-visual {
+    position: relative;
+    height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-circle {
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    z-index: 2;
+}
+
+.circle-logo {
+    width: 200px;
+    height: auto;
+    margin-bottom: 1rem;
+}
+
+.circle-text {
+    color: white;
+    font-size: 1.1rem;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.floating-badge {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+}
+
+.floating-badge i {
+    color: #8A63D2;
+    font-size: 1.5rem;
+}
+
+.badge1 {
+    top: 20%;
+    left: 10%;
+    animation: float 3s ease-in-out infinite;
+}
+
+.badge2 {
+    top: 50%;
+    right: 10%;
+    animation: float 3s ease-in-out infinite 1s;
+}
+
+.badge3 {
+    bottom: 20%;
+    left: 15%;
+    animation: float 3s ease-in-out infinite 2s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #212529;
+}
+
+.section-description {
+    font-size: 1.2rem;
+    color: #6c757d;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Mission Cards */
+.mission-section {
+    padding: 5rem 0;
+    background-color: #fff;
+}
+
+.mission-card {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease;
+    height: 100%;
+}
+
+.mission-card:hover {
+    transform: translateY(-10px);
+}
+
+.icon-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #e3f2fd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+}
+
+.icon-wrapper i {
+    font-size: 2rem;
+    color: #6f42c1;
+}
+
+/* Values Section */
+.values-section {
+    padding: 5rem 0;
+    background-color: #f8f9fa;
+}
+
+.value-card {
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+    transition: transform 0.3s ease;
+}
+
+.value-card:hover {
+    transform: translateY(-5px);
+}
+
+.value-icon {
+    width: 60px;
+    height: 60px;
+    background: #6f42c1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+}
+
+.value-icon i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.value-card h4 {
+    color: #212529;
+    margin-bottom: 1rem;
+}
+
+.value-card p {
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    .hero-visual {
+        height: 400px;
+        margin-top: 2rem;
+    }
+
+    .logo-circle {
+        width: 250px;
+        height: 250px;
+    }
+
+    .circle-logo {
+        width: 150px;
+    }
+
+    .hero-stats {
+        gap: 1.5rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+    }
+
+    .mission-card {
+        margin-bottom: 2rem;
+    }
+}
+</style>
+{% endblock %} 
