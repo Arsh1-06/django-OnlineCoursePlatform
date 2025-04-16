@@ -4,9 +4,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('', include('courses.urls')),  # This will make the home page accessible at the root URL
+    path('', include('courses.urls')),  
     path('admin/', admin.site.urls),
-    path('reviews/', include('reviews.urls')),  # Add the reviews app URLs
+    path('reviews/', include('reviews.urls')),  
 ]
 
 if settings.DEBUG:

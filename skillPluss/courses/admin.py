@@ -2,12 +2,11 @@ from django.contrib import admin
 from .models import Course, Student, Category
 
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('course_id', 'cname', 'fee', 'duration')  # Display columns
+    list_display = ('course_id', 'cname', 'fee', 'duration')  
 
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('name', 'email', 'gender', 'qualification', 'enrolled_courses')
     
-    # To display the gender as radio button
     radio_fields = {'gender': admin.VERTICAL}
 
     def enrolled_courses(self, obj):
@@ -21,6 +20,6 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     ordering = ('name',)
 
-admin.site.register(Course, CourseAdmin)  # Register Course with CourseAdmin
-admin.site.register(Student, StudentAdmin)  # Register Student with StudentAdmin
+admin.site.register(Course, CourseAdmin) 
+admin.site.register(Student, StudentAdmin)
 admin.site.register(Category, CategoryAdmin)

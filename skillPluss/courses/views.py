@@ -11,7 +11,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 def home(request):
     categories = Category.objects.all()[:8]  
-    featured_courses = Course.objects.filter(average_rating__gte=4.0).order_by('-total_ratings')[:6] 
+    featured_courses = Course.objects.all().order_by('-created_at')[:8]  
     return render(request, 'courses/home.html', {
         'categories': categories,
         'featured_courses': featured_courses
@@ -45,16 +45,12 @@ def course_detail(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
     ratings = Rating.objects.filter(course=course).order_by('-created_at')
     
-    # Check if user is enrolled
     is_enrolled = False
     if request.user.is_authenticated:
         try:
-            # First try to get the student by email
             student = Student.objects.get(email=request.user.email)
-            # Check if the course is in the student's courses
             is_enrolled = student.courses.filter(course_id=course.course_id).exists()
             
-            # Debug message to help troubleshoot
             print(f"User: {request.user.email}, Is Enrolled: {is_enrolled}")
             print(f"Student courses: {[c.course_id for c in student.courses.all()]}")
             print(f"Course ID: {course.course_id}")
@@ -81,7 +77,6 @@ def course_detail(request, course_id):
         'is_enrolled': is_enrolled
     }
     
-    # Render the template with the context
     return render(request, 'courses/course_detail.html', context)
 
 def category_courses(request, category_id):
@@ -96,41 +91,32 @@ def category_courses(request, category_id):
 def enroll_course(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
     
-    # Check if user is already enrolled
     try:
         student = Student.objects.get(email=request.user.email)
         if course in student.courses.all():
             messages.warning(request, 'You are already enrolled in this course!')
             return redirect('courses:course_detail', course_id=course.course_id)
     except Student.DoesNotExist:
-        # Create a new student if one doesn't exist
         student = Student.objects.create(
             email=request.user.email,
             name=request.user.get_full_name() or request.user.username,
-            gender='O',  # Default to 'Other'
-            qualification=''  # Empty by default
+            gender='O',  
+            qualification=''  
         )
     
-    # If it's a POST request, process the enrollment
     if request.method == 'POST':
-        # Handle payment logic
         if course.fee > 0:
-            # For now, just show a success message
-            # In production, integrate with a payment gateway
             messages.info(request, f'Please complete the payment of ₹{course.fee} to access the course.')
             return render(request, 'courses/payment.html', {
                 'course': course,
                 'student': student
             })
         else:
-            # If course is free, enroll directly
             student.courses.add(course)
-            # Force a refresh from the database
             student.refresh_from_db()
             messages.success(request, f'Successfully enrolled in {course.cname}!')
             return redirect('courses:course_detail', course_id=course.course_id)
     
-    # For GET requests, show the enrollment page
     return render(request, 'courses/enroll.html', {'course': course})
 
 def pricing(request):
@@ -171,7 +157,6 @@ def user_register(request):
             messages.error(request, 'Email already registered!')
             return render(request, 'courses/register.html')
         
-        # Create user
         user = User.objects.create_user(
             username=username,
             email=email,
@@ -180,19 +165,16 @@ def user_register(request):
             last_name=request.POST.get('last_name')
         )
         
-        # Create user profile
         profile = UserProfile.objects.create(
             user=user,
             role=role,
             bio=request.POST.get('bio', '')
         )
         
-        # Handle profile picture
         if 'profile_pic' in request.FILES:
             profile.profile_pic = request.FILES['profile_pic']
             profile.save()
         
-        # Log user in
         login(request, user)
         messages.success(request, 'Registration successful!')
         return redirect('courses:home')
@@ -286,7 +268,6 @@ def add_lesson(request, course_id):
                 order=course.lessons.count() + 1
             )
             
-            # Handle different content types
             if lesson.type == 'video':
                 lesson.video_url = request.POST['video_url']
             elif lesson.type == 'text':
@@ -298,7 +279,6 @@ def add_lesson(request, course_id):
             
             lesson.save()
             
-            # Handle additional resources
             if 'resources' in request.FILES:
                 for file in request.FILES.getlist('resources'):
                     LessonResource.objects.create(
@@ -328,7 +308,6 @@ def edit_lesson(request, course_id, lesson_id):
             lesson.type = request.POST['type']
             lesson.duration = request.POST['duration']
             
-            # Handle different content types
             if lesson.type == 'video':
                 lesson.video_url = request.POST['video_url']
             elif lesson.type == 'text':
@@ -390,11 +369,9 @@ def user_profile(request):
     
     user = request.user
     
-    # Create UserProfile if it doesn't exist
     try:
         profile = user.userprofile
     except:
-        # Default to student role if no profile exists
         profile = UserProfile.objects.create(
             user=user,
             role='student'
@@ -407,7 +384,6 @@ def user_profile(request):
             'courses': courses
         })
     else:
-        # Get or create student profile
         try:
             student = Student.objects.get(email=user.email)
         except Student.DoesNotExist:
@@ -420,7 +396,6 @@ def user_profile(request):
         
         enrolled_courses = student.courses.all()
         
-        # Calculate progress for each course
         for course in enrolled_courses:
             total_lessons = course.lessons.count()
             completed_lessons = student.completed_lessons.filter(lesson__course=course)
@@ -504,16 +479,13 @@ def edit_user_profile(request):
         )
     
     if request.method == 'POST':
-        # Update user fields
         user.first_name = request.POST.get('first_name', '')
         user.last_name = request.POST.get('last_name', '')
         user.email = request.POST.get('email', user.email)
         user.save()
         
-        # Update profile fields
         profile.bio = request.POST.get('bio', '')
         
-        # Handle profile picture
         if 'profile_pic' in request.FILES:
             profile.profile_pic = request.FILES['profile_pic']
         
@@ -530,7 +502,6 @@ def edit_user_profile(request):
 def rate_course(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
     
-    # Check if user is enrolled in the course
     try:
         student = Student.objects.get(email=request.user.email)
         if course not in student.courses.all():
@@ -545,7 +516,6 @@ def rate_course(request, course_id):
         review = request.POST.get('review', '')
         
         if rating_value:
-            # Create or update the rating
             rating, created = Rating.objects.get_or_create(
                 course=course,
                 student=student,
@@ -571,7 +541,6 @@ def rate_course(request, course_id):
 def edit_course(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
     
-    # Check if the user is the instructor of this course
     if request.user != course.instructor:
         messages.error(request, 'You do not have permission to edit this course.')
         return redirect('courses:instructor_dashboard')
@@ -579,7 +548,6 @@ def edit_course(request, course_id):
     categories = Category.objects.all()
     
     if request.method == 'POST':
-        # Get form data
         cname = request.POST.get('cname')
         description = request.POST.get('description')
         category_id = request.POST.get('category')
@@ -590,7 +558,6 @@ def edit_course(request, course_id):
         level = request.POST.get('level')
         status = request.POST.get('status')
         
-        # Update course
         course.cname = cname
         course.description = description
         course.category_id = category_id
@@ -601,9 +568,7 @@ def edit_course(request, course_id):
         course.level = level
         course.status = status
         
-        # Handle image upload
         if request.FILES.get('image'):
-            # Delete old image if it exists
             if course.image:
                 course.image.delete()
             course.image = request.FILES['image']
@@ -624,18 +589,15 @@ def edit_course(request, course_id):
 def delete_course(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
     
-    # Check if the user is the instructor of this course
     if request.user != course.instructor:
         messages.error(request, 'You do not have permission to delete this course.')
         return redirect('courses:instructor_dashboard')
     
     if request.method == 'POST':
         try:
-            # Delete the course image if it exists
             if course.image:
                 course.image.delete()
             
-            # Delete the course
             course.delete()
             messages.success(request, 'Course deleted successfully.')
         except Exception as e:
@@ -648,35 +610,29 @@ def view_lesson(request, course_id, lesson_id):
     course = get_object_or_404(Course, course_id=course_id)
     lesson = get_object_or_404(Lesson, id=lesson_id, course=course)
     
-    # Check if user is enrolled in the course
     is_enrolled = False
     try:
         student = Student.objects.get(email=request.user.email)
-        # Check if the course is in the student's courses
         is_enrolled = student.courses.filter(course_id=course.course_id).exists()
         
         if not is_enrolled:
             messages.error(request, 'You must be enrolled in this course to access lessons.')
             return redirect('courses:course_detail', course_id=course_id)
             
-        # Mark lesson as completed
         CompletedLesson.objects.get_or_create(student=student, lesson=lesson)
             
     except Student.DoesNotExist:
         messages.error(request, 'You must be enrolled in this course to access lessons.')
         return redirect('courses:course_detail', course_id=course_id)
     
-    # Get all lessons for navigation
     all_lessons = course.lessons.all().order_by('order')
     
-    # Find current lesson index for navigation
     current_index = 0
     for i, l in enumerate(all_lessons):
         if l.id == lesson.id:
             current_index = i
             break
     
-    # Get previous and next lessons
     prev_lesson = all_lessons[current_index - 1] if current_index > 0 else None
     next_lesson = all_lessons[current_index + 1] if current_index < len(all_lessons) - 1 else None
     
@@ -693,35 +649,28 @@ def view_lesson(request, course_id, lesson_id):
 def direct_enroll(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
     
-    # Only process enrollment for POST requests
     if request.method != 'POST':
         return redirect('courses:course_detail', course_id=course.course_id)
     
-    # Check if user is already enrolled
     try:
         student = Student.objects.get(email=request.user.email)
         if student.courses.filter(course_id=course.course_id).exists():
             messages.warning(request, 'You are already enrolled in this course!')
             return redirect('courses:course_detail', course_id=course.course_id)
     except Student.DoesNotExist:
-        # Create a new student if one doesn't exist
         student = Student.objects.create(
             email=request.user.email,
             name=request.user.get_full_name() or request.user.username,
-            gender='O',  # Default to 'Other'
-            qualification=''  # Empty by default
+            gender='O',  
+            qualification=''  
         )
     
-    # Handle payment logic
     if course.fee > 0:
-        # Check if this is a payment completion request
         if request.POST.get('payment_completed') == 'true':
             try:
-                # Add the course to the student's courses
                 student.courses.add(course)
                 student.save()
                 
-                # Return JSON response for AJAX request
                 if request.headers.get('Accept') == 'application/json':
                     return JsonResponse({
                         'status': 'success',
@@ -739,13 +688,11 @@ def direct_enroll(request, course_id):
                 messages.error(request, f'Error enrolling in course: {str(e)}')
                 return redirect('courses:course_detail', course_id=course.course_id)
         else:
-            # Show payment page
             return render(request, 'courses/payment.html', {
                 'course': course,
                 'student': student
             })
     else:
-        # If course is free, enroll directly
         student.courses.add(course)
         messages.success(request, f'Successfully enrolled in {course.cname}!')
         return redirect('courses:course_detail', course_id=course.course_id)
@@ -755,3 +702,19 @@ def about(request):
     View for the About Us page
     """
     return render(request, 'courses/about.html')
+
+def help_support(request):
+    """
+    View for the combined help and support page.
+    Handles both the FAQ display and contact form submission.
+    """
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        topic = request.POST.get('topic')
+        message = request.POST.get('message')
+        
+        messages.success(request, 'Your message has been sent. We will get back to you soon!')
+        return redirect('courses:help_support')
+        
+    return render(request, 'courses/help_support.html')

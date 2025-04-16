@@ -1,0 +1,238 @@
+{% extends 'courses/base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} Courses - SkillPluss{% endblock %}
+
+{% block content %}
+<div class="category-page">
+    <!-- Category Header -->
+    <div class="category-header">
+        <div class="container py-5">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="category-title">{{ category.name }}</h1>
+                    <p class="category-description">Explore our {{ category.name }} courses and start learning today.</p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <div class="category-icon-large">
+                        <i class="fas fa-{{ category.icon|default:'book' }}"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Courses Grid -->
+    <div class="container py-5">
+        <div class="row">
+            <!-- Filters Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="filters-card">
+                    <h4>Filters</h4>
+                    <form method="GET">
+                        <div class="mb-3">
+                            <label class="form-label">Price</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="price" value="all" {% if not request.GET.price or request.GET.price == 'all' %}checked{% endif %}>
+                                <label class="form-check-label">All Prices</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="price" value="free" {% if request.GET.price == 'free' %}checked{% endif %}>
+                                <label class="form-check-label">Free</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="price" value="paid" {% if request.GET.price == 'paid' %}checked{% endif %}>
+                                <label class="form-check-label">Paid</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Rating</label>
+                            <select class="form-select" name="rating">
+                                <option value="">All Ratings</option>
+                                <option value="4" {% if request.GET.rating == '4' %}selected{% endif %}>4+ Stars</option>
+                                <option value="3" {% if request.GET.rating == '3' %}selected{% endif %}>3+ Stars</option>
+                                <option value="2" {% if request.GET.rating == '2' %}selected{% endif %}>2+ Stars</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-purple w-100">Apply Filters</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Courses List -->
+            <div class="col-lg-9">
+                {% if courses %}
+                    <div class="row g-4">
+                        {% for course in courses %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="course-card">
+                                {% if course.image %}
+                                    <img src="{{ course.image.url }}" alt="{{ course.cname }}" class="course-thumbnail">
+                                {% else %}
+                                    <div class="course-thumbnail-placeholder">
+                                        <i class="fas fa-book"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="course-info">
+                                    <h3 class="course-title">{{ course.cname }}</h3>
+                                    <p class="course-instructor">By {{ course.instructor.username }}</p>
+                                    <div class="course-meta">
+                                        <span class="rating">
+                                            <i class="fas fa-star"></i>
+                                            {{ course.average_rating|default:"0.0" }}
+                                        </span>
+                                        <span class="students">
+                                            <i class="fas fa-users"></i>
+                                            {{ course.enrolled_students.count }}
+                                        </span>
+                                    </div>
+                                    <div class="course-price">
+                                        {% if course.fee > 0 %}
+                                            <span class="price">₹{{ course.fee }}</span>
+                                        {% else %}
+                                            <span class="price free">Free</span>
+                                        {% endif %}
+                                    </div>
+                                    <a href="{% url 'courses:course_detail' course.course_id %}" class="btn btn-primary btn-sm w-100">View Course</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <h3>No courses available in this category yet</h3>
+                        <p class="text-muted">Check back later for new courses</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.category-page {
+    background-color: #f8f9fa;
+}
+
+.category-header {
+    background: linear-gradient(135deg, #6f42c1 0%, #8a63d2 100%);
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.category-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.category-description {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.category-icon-large {
+    font-size: 4rem;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.filters-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.course-card {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.course-thumbnail {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+}
+
+.course-thumbnail-placeholder {
+    width: 100%;
+    height: 160px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6f42c1;
+    font-size: 2rem;
+}
+
+.course-info {
+    padding: 1.25rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.course-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+
+.course-instructor {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.course-meta {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.course-meta i {
+    color: #ffc107;
+    margin-right: 0.25rem;
+}
+
+.course-price {
+    margin-bottom: 1rem;
+    margin-top: auto;
+}
+
+.price {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.price.free {
+    color: #28a745;
+}
+
+@media (max-width: 992px) {
+    .category-title {
+        font-size: 2rem;
+    }
+    
+    .category-icon-large {
+        display: none;
+    }
+}
+</style>
+{% endblock %} 

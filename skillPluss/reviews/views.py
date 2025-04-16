@@ -10,7 +10,6 @@ from django.core.exceptions import PermissionDenied
 def add_review(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
     
-    # Check if user is enrolled
     try:
         student = Student.objects.get(email=request.user.email)
         if course not in student.courses.all():
@@ -20,7 +19,6 @@ def add_review(request, course_id):
         messages.error(request, "You must be enrolled in the course to leave a review.")
         return redirect('courses:course_detail', course_id=course_id)
     
-    # Check if user already has a review
     if Review.objects.filter(course=course, student=student).exists():
         messages.error(request, "You have already reviewed this course. You can edit your existing review.")
         return redirect('courses:course_detail', course_id=course_id)

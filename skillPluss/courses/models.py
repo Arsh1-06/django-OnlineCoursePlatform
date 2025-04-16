@@ -116,7 +116,6 @@ class Rating(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        # Update course average rating
         self.course.update_rating()
 
 class UserProfile(models.Model):
