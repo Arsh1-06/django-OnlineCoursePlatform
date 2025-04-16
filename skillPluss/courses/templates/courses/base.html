@@ -29,7 +29,7 @@
             margin-left: -1rem;
             color: var(--primary-purple) !important;
             font-weight: bold;
-            font-size: 1.5rem;
+            font-size: 1.35rem;
             text-decoration: none;
         }
         
@@ -52,11 +52,23 @@
             font-size: 1.25rem;
         }
         
+        .navbar-nav {
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .nav-item {
+            white-space: nowrap;
+        }
+        
         .nav-link {
             color: #333 !important;
             font-weight: 500;
-            padding: 0.2rem .7rem !important;
+            font-size: 0.95rem;
+            padding: 0.2rem 0.8rem !important;
             transition: color 0.3s ease;
+            white-space: nowrap;
         }
         
         .nav-link:hover {
@@ -65,7 +77,7 @@
         
         .search-container {
             position: relative;
-            min-width: 400px;
+            min-width: 300px;
             margin: 0 1.5rem;
         }
         
@@ -77,7 +89,7 @@
             border-radius: 25px 0 0 25px !important;
             border: 2px solid #e9ecef !important;
             padding: 0.6rem 1.2rem !important;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             transition: all 0.3s ease;
         }
         
@@ -148,6 +160,7 @@
         .btn-outline-purple {
             color: #6f42c1;
             border-color: #6f42c1;
+            font-size: 0.95rem;
         }
         
         .btn-outline-purple:hover {
@@ -190,6 +203,7 @@
             background-color: #6f42c1;
             border-color: #6f42c1;
             color: white;
+            font-size: 0.95rem;
         }
         
         .btn-purple:hover {
@@ -238,13 +252,13 @@
                         <a class="nav-link" href="{% url 'courses:home' %}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'courses:course_list' %}">All Courses</a>
+                        <a class="nav-link" href="{% url 'courses:course_list' %}">All&nbsp;Courses</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'courses:about' %}">About Us</a>
+                        <a class="nav-link" href="{% url 'courses:about' %}">About&nbsp;Us</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'courses:help_support' %}">Help & Support</a>
+                        <a class="nav-link" href="{% url 'courses:help_support' %}">Help&nbsp;&&nbsp;Support</a>
                     </li>
                     {% if user.is_authenticated and user.userprofile.role == 'instructor' %}
                     <li class="nav-item">
