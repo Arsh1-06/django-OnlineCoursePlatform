@@ -46,28 +46,43 @@ class Course(models.Model):
         return self.cname
 
     def update_rating(self):
-        ratings = self.ratings.all()
-        if ratings:
-            self.total_ratings = ratings.count()
-            self.average_rating = sum(rating.rating for rating in ratings) / self.total_ratings
+        reviews = self.reviews.all()
+        if reviews:
+            self.total_ratings = reviews.count()
+            self.average_rating = sum(review.rating for review in reviews) / self.total_ratings
         else:
             self.total_ratings = 0
             self.average_rating = 0
         self.save()
 
 class Lesson(models.Model):
+    TYPE_CHOICES = [
+        ('video', 'Video'),
+        ('text', 'Text'),
+        ('quiz', 'Quiz'),
+        ('assignment', 'Assignment')
+    ]
+
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons')
     title = models.CharField(max_length=200)
-    content = models.TextField()
-    video_url = models.URLField(null=True, blank=True)
+    description = models.TextField()  # Required field for lesson overview
+    content = models.TextField(blank=True)  # Optional detailed content
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='video')
+    duration = models.CharField(max_length=50, blank=True, help_text='Duration in minutes or time format (HH:MM:SS)')
+    video_url = models.URLField(null=True, blank=True, help_text="Optional: URL for external video (YouTube, Vimeo, etc.)")
+    video_file = models.FileField(upload_to='lesson_videos/', null=True, blank=True, help_text="Optional: Upload a video file")
     order = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['order']
 
     def __str__(self):
         return f"{self.course.cname} - {self.title}"
+
+    def has_video(self):
+        return bool(self.video_url) or bool(self.video_file)
 
 class LessonResource(models.Model):
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='resources')
@@ -142,3 +157,16 @@ class CompletedLesson(models.Model):
 
     def __str__(self):
         return f"{self.student.name} - {self.lesson.title}"
+
+class LessonComment(models.Model):
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.lesson.title}"

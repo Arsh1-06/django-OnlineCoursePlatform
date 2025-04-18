@@ -3,6 +3,155 @@
 {% block title %}Manage Lessons - {{ course.cname }} - SkillPluss+{% endblock %}
 
 {% block content %}
+<style>
+    /* Page spacing */
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumb {
+        background-color: transparent;
+        font-size: 1rem;
+        padding: 10px 15px;
+        border-radius: 5px;
+        color: #6c757d;
+    }
+
+    /* Heading and button */
+    h1.mb-0 {
+        font-size: 2rem;
+        font-weight: 700;
+        text-align: center;
+        color: #333;
+    }
+
+    /* Lesson Table */
+    .table {
+        font-size: 1rem;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .table thead th {
+        background-color: #f0f4f8;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .table td,
+    .table th {
+        vertical-align: middle;
+        padding: 12px;
+    }
+
+    /* Table Row Hover */
+    .table-hover tbody tr {
+        transition: background-color 0.3s ease;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #e3f2fd;
+    }
+
+    /* Action Buttons */
+    .btn-outline-primary,
+    .btn-outline-danger {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    /* Empty State */
+    .table .text-center i {
+        font-size: 2.5rem;
+        color: #adb5bd;
+    }
+
+    .table .text-center p {
+        color: #6c757d;
+        font-size: 1rem;
+    }
+
+    /* Modal Forms */
+    .modal-title {
+        font-weight: 700;
+        color: #343a40;
+    }
+
+    .modal-body .form-label {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .modal-body .form-text {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .modal-body input[type="text"],
+    .modal-body input[type="url"],
+    .modal-body input[type="file"],
+    .modal-body textarea,
+    .modal-body select {
+        font-size: 1rem;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ced4da;
+        transition: border-color 0.3s ease;
+    }
+
+    .modal-body input:focus,
+    .modal-body textarea:focus,
+    .modal-body select:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+
+    .modal-footer .btn {
+        min-width: 120px;
+        font-weight: 600;
+        padding: 8px 16px;
+    }
+
+    /* Sortable hover effect */
+    .sortable tr {
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .sortable tr:hover {
+        cursor: move;
+        background-color: #e9ecef;
+        transform: scale(1.02);
+    }
+
+    /* Subtle Box Shadow for Tables */
+    .table {
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Smooth Hover Effects */
+    .btn {
+        transition: transform 0.2s ease;
+    }
+
+    .btn:hover {
+        transform: scale(1.05);
+    }
+</style>
 <div class="container py-4">
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
@@ -35,8 +184,8 @@
                         <tr>
                             <th style="width: 50px;">#</th>
                             <th>Lesson Title</th>
-                            <th>Duration</th>
-                            <th>Type</th>
+                            <th>Content Preview</th>
+                            <th>Video</th>
                             <th style="width: 150px;">Actions</th>
                         </tr>
                     </thead>
@@ -48,18 +197,21 @@
                                 {{ forloop.counter }}
                             </td>
                             <td>{{ lesson.title }}</td>
-                            <td>{{ lesson.duration }} min</td>
+                            <td>{{ lesson.content|truncatechars:50 }}</td>
                             <td>
-                                <span class="badge bg-{{ lesson.type_color }}">
-                                    <i class="fas fa-{{ lesson.type_icon }} me-1"></i>
-                                    {{ lesson.get_type_display }}
-                                </span>
+                                {% if lesson.has_video %}
+                                <i class="fas fa-video text-success"></i>
+                                {% else %}
+                                <i class="fas fa-times text-muted"></i>
+                                {% endif %}
                             </td>
                             <td>
-                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editLesson{{ lesson.id }}">
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                    data-bs-target="#editLesson{{ lesson.id }}">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteLesson{{ lesson.id }}">
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                    data-bs-target="#deleteLesson{{ lesson.id }}">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </td>
@@ -95,41 +247,51 @@
                         <input type="text" class="form-control" id="title" name="title" required>
                     </div>
                     <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
+                        <label for="description" class="form-label">Brief Description</label>
                         <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                        <div class="form-text">A short overview of what this lesson covers</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Detailed Content (Optional)</label>
+                        <textarea class="form-control" id="content" name="content" rows="5"></textarea>
+                        <div class="form-text">The full lesson content, instructions, or details</div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="type" class="form-label">Lesson Type</label>
                             <select class="form-select" id="type" name="type" required>
-                                <option value="video">Video Lesson</option>
-                                <option value="text">Text Content</option>
+                                <option value="video">Video</option>
+                                <option value="text">Text</option>
                                 <option value="quiz">Quiz</option>
                                 <option value="assignment">Assignment</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="duration" class="form-label">Duration (minutes)</label>
-                            <input type="number" class="form-control" id="duration" name="duration" min="1" required>
+                            <label for="duration" class="form-label">Duration</label>
+                            <input type="text" class="form-control" id="duration" name="duration"
+                                placeholder="e.g., 30 minutes">
+                            <div class="form-text">How long this lesson takes to complete</div>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="content" class="form-label">Content</label>
-                        <div class="content-type video-content">
-                            <input type="text" class="form-control" name="video_url" placeholder="YouTube or Vimeo URL">
-                        </div>
-                        <div class="content-type text-content d-none">
-                            <textarea class="form-control" name="text_content" rows="5" placeholder="Enter lesson content here..."></textarea>
-                        </div>
-                        <div class="content-type quiz-content d-none">
-                            <textarea class="form-control" name="quiz_questions" rows="5" placeholder="Enter quiz questions (one per line)..."></textarea>
-                        </div>
-                        <div class="content-type assignment-content d-none">
-                            <textarea class="form-control" name="assignment_details" rows="5" placeholder="Enter assignment details..."></textarea>
-                        </div>
+                        <label for="video_file" class="form-label">Video File (Optional)</label>
+                        <input type="file" class="form-control" id="video_file" name="video_file"
+                            accept="video/mp4,video/webm">
+                        <div class="form-text">Upload MP4 or WebM video files</div>
                     </div>
                     <div class="mb-3">
-                        <label for="resources" class="form-label">Additional Resources</label>
+                        <label for="video_url" class="form-label">Video URL (Optional)</label>
+                        <input type="url" class="form-control" id="video_url" name="video_url"
+                            placeholder="YouTube or Vimeo URL">
+                        <div class="form-text">Enter a URL for external video (YouTube, Vimeo, etc.)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="order" class="form-label">Lesson Order</label>
+                        <input type="number" class="form-control" id="order" name="order" min="1" required>
+                        <div class="form-text">The order in which this lesson appears in the course</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="resources" class="form-label">Additional Resources (Optional)</label>
                         <input type="file" class="form-control" id="resources" name="resources" multiple>
                         <div class="form-text">Upload PDFs, documents, or other supplementary materials</div>
                     </div>
@@ -152,15 +314,37 @@
                 <h5 class="modal-title">Edit Lesson</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="post" action="{% url 'courses:edit_lesson' course.course_id lesson.id %}" enctype="multipart/form-data">
+            <form method="post" action="{% url 'courses:edit_lesson' course.course_id lesson.id %}"
+                enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <!-- Similar fields as Add Lesson form, but with lesson's current values -->
                     <div class="mb-3">
                         <label for="edit_title_{{ lesson.id }}" class="form-label">Lesson Title</label>
-                        <input type="text" class="form-control" id="edit_title_{{ lesson.id }}" name="title" value="{{ lesson.title }}" required>
+                        <input type="text" class="form-control" id="edit_title_{{ lesson.id }}" name="title"
+                            value="{{ lesson.title }}" required>
                     </div>
-                    <!-- Add other fields similarly -->
+                    <div class="mb-3">
+                        <label for="edit_content_{{ lesson.id }}" class="form-label">Lesson Content</label>
+                        <textarea class="form-control" id="edit_content_{{ lesson.id }}" name="content" rows="5"
+                            required>{{ lesson.content }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_video_file_{{ lesson.id }}" class="form-label">Video File (Optional)</label>
+                        <input type="file" class="form-control" id="edit_video_file_{{ lesson.id }}" name="video_file"
+                            accept="video/mp4,video/webm">
+                        <div class="form-text">Current: {% if lesson.video_file %}{{ lesson.video_file.name }}{% else
+                            %}No file uploaded{% endif %}</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_video_url_{{ lesson.id }}" class="form-label">Video URL (Optional)</label>
+                        <input type="url" class="form-control" id="edit_video_url_{{ lesson.id }}" name="video_url"
+                            value="{{ lesson.video_url|default:'' }}" placeholder="YouTube or Vimeo URL">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_order_{{ lesson.id }}" class="form-label">Lesson Order</label>
+                        <input type="number" class="form-control" id="edit_order_{{ lesson.id }}" name="order"
+                            value="{{ lesson.order }}" min="1" required>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -185,7 +369,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form action="{% url 'courses:delete_lesson' course.course_id lesson.id %}" method="post" class="d-inline">
+                <form action="{% url 'courses:delete_lesson' course.course_id lesson.id %}" method="post"
+                    class="d-inline">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Delete Lesson</button>
                 </form>
@@ -193,35 +378,37 @@
         </div>
     </div>
 </div>
+
 {% endfor %}
 
 {% block extra_js %}
 <script>
-document.getElementById('type').addEventListener('change', function() {
-    const contentTypes = document.querySelectorAll('.content-type');
-    contentTypes.forEach(el => el.classList.add('d-none'));
-    
-    const selectedType = this.value + '-content';
-    document.querySelector('.' + selectedType).classList.remove('d-none');
-});
+    document.getElementById('type').addEventListener('change', function () {
+        const contentTypes = document.querySelectorAll('.content-type');
+        contentTypes.forEach(el => el.classList.add('d-none'));
 
-// Initialize sortable for drag-and-drop lesson reordering
-new Sortable(document.querySelector('.sortable'), {
-    handle: '.fa-grip-vertical',
-    animation: 150,
-    onEnd: function(evt) {
-        // Send new order to server
-        const lessonIds = Array.from(evt.to.children).map(el => el.dataset.lessonId);
-        fetch('{% url "courses:reorder_lessons" course.course_id %}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            },
-            body: JSON.stringify({ lesson_order: lessonIds })
-        });
-    }
-});
+        const selectedType = this.value + '-content';
+        document.querySelector('.' + selectedType).classList.remove('d-none');
+    });
+
+    // Initialize sortable for drag-and-drop lesson reordering
+    new Sortable(document.querySelector('.sortable'), {
+        handle: '.fa-grip-vertical',
+        animation: 150,
+        onEnd: function (evt) {
+            // Send new order to server
+            const lessonIds = Array.from(evt.to.children).map(el => el.dataset.lessonId);
+            fetch('{% url "courses:reorder_lessons" course.course_id %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({ lesson_order: lessonIds })
+            });
+        }
+    });
 </script>
 {% endblock %}
-{% endblock %} 
+
+{% endblock %}

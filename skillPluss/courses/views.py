@@ -4,10 +4,14 @@ from django.db.models import Q
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .models import Course, Category, Lesson, Student, Rating, UserProfile, LessonResource, CompletedLesson
+from .models import Course, Category, Lesson, Student, UserProfile, LessonResource, CompletedLesson, LessonComment
+from reviews.models import Review
 from django.http import JsonResponse, HttpResponseRedirect
 import json
 from django.contrib.admin.views.decorators import staff_member_required
+from django.views.decorators.http import require_POST
+from django.core.paginator import Paginator
+from .forms import CourseForm, LessonForm, LessonCommentForm
 
 def home(request):
     categories = Category.objects.all()[:8]  
@@ -43,7 +47,7 @@ def course_list(request):
 
 def course_detail(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
-    ratings = Rating.objects.filter(course=course).order_by('-created_at')
+    reviews = Review.objects.filter(course=course).order_by('-created_at')
     
     is_enrolled = False
     if request.user.is_authenticated:
@@ -73,7 +77,7 @@ def course_detail(request, course_id):
     
     context = {
         'course': course,
-        'ratings': ratings,
+        'reviews': reviews,
         'is_enrolled': is_enrolled
     }
     
@@ -258,38 +262,27 @@ def add_lesson(request, course_id):
         return redirect('courses:home')
     
     if request.method == 'POST':
-        try:
-            lesson = Lesson.objects.create(
-                course=course,
-                title=request.POST['title'],
-                description=request.POST['description'],
-                type=request.POST['type'],
-                duration=request.POST['duration'],
-                order=course.lessons.count() + 1
-            )
-            
-            if lesson.type == 'video':
-                lesson.video_url = request.POST['video_url']
-            elif lesson.type == 'text':
-                lesson.content = request.POST['text_content']
-            elif lesson.type == 'quiz':
-                lesson.content = request.POST['quiz_questions']
-            elif lesson.type == 'assignment':
-                lesson.content = request.POST['assignment_details']
-            
-            lesson.save()
-            
-            if 'resources' in request.FILES:
-                for file in request.FILES.getlist('resources'):
-                    LessonResource.objects.create(
-                        lesson=lesson,
-                        file=file,
-                        filename=file.name
-                    )
-            
-            messages.success(request, 'Lesson added successfully!')
-        except Exception as e:
-            messages.error(request, f'Error adding lesson: {str(e)}')
+        form = LessonForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                lesson = form.save(commit=False)
+                lesson.course = course
+                lesson.order = course.lessons.count() + 1
+                lesson.save()
+                
+                if 'resources' in request.FILES:
+                    for file in request.FILES.getlist('resources'):
+                        LessonResource.objects.create(
+                            lesson=lesson,
+                            file=file,
+                            filename=file.name
+                        )
+                
+                messages.success(request, 'Lesson added successfully!')
+            except Exception as e:
+                messages.error(request, f'Error adding lesson: {str(e)}')
+        else:
+            messages.error(request, 'Please correct the errors in the form.')
     
     return redirect('courses:manage_lessons', course_id=course_id)
 
@@ -302,25 +295,15 @@ def edit_lesson(request, course_id, lesson_id):
         return redirect('courses:home')
     
     if request.method == 'POST':
-        try:
-            lesson.title = request.POST['title']
-            lesson.description = request.POST['description']
-            lesson.type = request.POST['type']
-            lesson.duration = request.POST['duration']
-            
-            if lesson.type == 'video':
-                lesson.video_url = request.POST['video_url']
-            elif lesson.type == 'text':
-                lesson.content = request.POST['text_content']
-            elif lesson.type == 'quiz':
-                lesson.content = request.POST['quiz_questions']
-            elif lesson.type == 'assignment':
-                lesson.content = request.POST['assignment_details']
-            
-            lesson.save()
-            messages.success(request, 'Lesson updated successfully!')
-        except Exception as e:
-            messages.error(request, f'Error updating lesson: {str(e)}')
+        form = LessonForm(request.POST, request.FILES, instance=lesson)
+        if form.is_valid():
+            try:
+                form.save()
+                messages.success(request, 'Lesson updated successfully!')
+            except Exception as e:
+                messages.error(request, f'Error updating lesson: {str(e)}')
+        else:
+            messages.error(request, 'Please correct the errors in the form.')
     
     return redirect('courses:manage_lessons', course_id=course_id)
 
@@ -516,7 +499,7 @@ def rate_course(request, course_id):
         review = request.POST.get('review', '')
         
         if rating_value:
-            rating, created = Rating.objects.get_or_create(
+            rating, created = Review.objects.get_or_create(
                 course=course,
                 student=student,
                 defaults={
@@ -606,44 +589,109 @@ def delete_course(request, course_id):
     return redirect('courses:instructor_dashboard')
 
 @login_required
-def view_lesson(request, course_id, lesson_id):
+def watch_lesson(request, course_id, lesson_id):
     course = get_object_or_404(Course, course_id=course_id)
     lesson = get_object_or_404(Lesson, id=lesson_id, course=course)
     
-    is_enrolled = False
+    if not request.user.is_authenticated:
+        return redirect('courses:login')
+    
     try:
         student = Student.objects.get(email=request.user.email)
         is_enrolled = student.courses.filter(course_id=course.course_id).exists()
-        
         if not is_enrolled:
-            messages.error(request, 'You must be enrolled in this course to access lessons.')
-            return redirect('courses:course_detail', course_id=course_id)
-            
-        CompletedLesson.objects.get_or_create(student=student, lesson=lesson)
-            
+            messages.error(request, 'You need to enroll in this course to access the lessons.')
+            return redirect('courses:course_detail', course_id=course.course_id)
     except Student.DoesNotExist:
-        messages.error(request, 'You must be enrolled in this course to access lessons.')
-        return redirect('courses:course_detail', course_id=course_id)
+        messages.error(request, 'You need to enroll in this course to access the lessons.')
+        return redirect('courses:course_detail', course_id=course.course_id)
     
-    all_lessons = course.lessons.all().order_by('order')
+    lessons = course.lessons.all().order_by('order')
+    current_index = list(lessons).index(lesson)
     
-    current_index = 0
-    for i, l in enumerate(all_lessons):
-        if l.id == lesson.id:
-            current_index = i
-            break
+    prev_lesson = lessons[current_index - 1] if current_index > 0 else None
+    next_lesson = lessons[current_index + 1] if current_index < len(lessons) - 1 else None
     
-    prev_lesson = all_lessons[current_index - 1] if current_index > 0 else None
-    next_lesson = all_lessons[current_index + 1] if current_index < len(all_lessons) - 1 else None
+    comments = lesson.comments.all()
+    comment_form = LessonCommentForm()
     
-    return render(request, 'courses/lesson_detail.html', {
+    if request.method == 'POST':
+        comment_form = LessonCommentForm(request.POST)
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.lesson = lesson
+            comment.user = request.user
+            comment.save()
+            messages.success(request, 'Your comment has been added.')
+            return redirect('courses:watch_lesson', course_id=course.course_id, lesson_id=lesson.id)
+    
+    context = {
         'course': course,
         'lesson': lesson,
         'prev_lesson': prev_lesson,
         'next_lesson': next_lesson,
-        'all_lessons': all_lessons,
-        'current_index': current_index
-    })
+        'comments': comments,
+        'comment_form': comment_form,
+    }
+    return render(request, 'courses/watch_lesson.html', context)
+
+@login_required
+@require_POST
+def add_lesson_comment(request, lesson_id):
+    lesson = get_object_or_404(Lesson, id=lesson_id)
+    
+    try:
+        # Create the comment
+        comment = LessonComment.objects.create(
+            lesson=lesson,
+            user=request.user,
+            content=request.POST.get('content')
+        )
+        
+        # Return success response with comment data
+        return JsonResponse({
+            'success': True,
+            'comment_id': comment.id,
+            'username': comment.user.username,
+            'content': comment.content,
+            'created_at': comment.created_at.strftime('%b %d, %Y, %I:%M %p'),
+            'user_initial': comment.user.username[0].upper(),
+            'profile_pic_url': comment.user.userprofile.profile_pic.url if comment.user.userprofile.profile_pic else None
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=400)
+
+@login_required
+def delete_lesson_comment(request, comment_id):
+    if not request.user.is_staff:
+        return JsonResponse({
+            'success': False,
+            'message': 'Permission denied. Only administrators can delete comments.'
+        }, status=403)
+    
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid request method'
+        }, status=400)
+    
+    try:
+        comment = LessonComment.objects.get(id=comment_id)
+        comment.delete()
+        return JsonResponse({'success': True})
+    except LessonComment.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'Comment not found'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=500)
 
 @login_required
 def direct_enroll(request, course_id):

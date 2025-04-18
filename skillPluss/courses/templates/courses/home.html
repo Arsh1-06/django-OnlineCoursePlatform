@@ -11,18 +11,15 @@
             <div class="row align-items-center">
                 <div class="col-lg-6">
                     <h1 class="hero-title">Learn New Skills Online</h1>
-                    <p class="hero-text">Discover thousands of courses taught by industry experts. Start learning today and advance your career.</p>
+                    <p class="hero-text">Discover thousands of courses taught by industry experts. Start learning today
+                        and advance your career.</p>
                     <div class="hero-buttons">
                         <a href="{% url 'courses:course_list' %}" class="btn btn-light btn-lg me-3">Explore Courses</a>
                         <a href="{% url 'courses:register' %}" class="btn btn-outline-light btn-lg">Join Now</a>
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <div class="hero-image">
-                        <img src="https://via.placeholder.com/600x400/6f42c1/ffffff?text=SkillPluss+" 
-                             alt="Learning Illustration" 
-                             class="img-fluid hero-img">
-                    </div>
+
                 </div>
             </div>
         </div>
@@ -36,49 +33,50 @@
                 <a href="{% url 'courses:course_list' %}" class="btn btn-outline-primary">View All Courses</a>
             </div>
             {% if featured_courses %}
-                <div class="courses-scroll-container">
-                    <div class="courses-scroll">
-                        {% for course in featured_courses %}
-                        <div class="course-card">
-                            <div class="course-badge">New</div>
-                            {% if course.image %}
-                                <img src="{{ course.image.url }}" alt="{{ course.cname }}" class="course-thumbnail">
-                            {% else %}
-                                <div class="course-thumbnail-placeholder">
-                                    <i class="fas fa-book"></i>
-                                </div>
-                            {% endif %}
-                            <div class="course-info">
-                                <h3 class="course-title">{{ course.cname }}</h3>
-                                <p class="course-instructor">By {{ course.instructor.username }}</p>
-                                <div class="course-meta">
-                                    <span class="rating">
-                                        <i class="fas fa-star"></i>
-                                        {{ course.average_rating|default:"0.0" }}
-                                    </span>
-                                    <span class="students">
-                                        <i class="fas fa-users"></i>
-                                        {{ course.enrolled_students.count }}
-                                    </span>
-                                </div>
-                                <div class="course-price">
-                                    {% if course.fee > 0 %}
-                                        <span class="price">₹{{ course.fee }}</span>
-                                    {% else %}
-                                        <span class="price free">Free</span>
-                                    {% endif %}
-                                </div>
-                                <a href="{% url 'courses:course_detail' course.course_id %}" class="btn btn-primary btn-sm">View Course</a>
-                            </div>
+            <div class="courses-scroll-container">
+                <div class="courses-scroll">
+                    {% for course in featured_courses %}
+                    <div class="course-card">
+                        <div class="course-badge">New</div>
+                        {% if course.image %}
+                        <img src="{{ course.image.url }}" alt="{{ course.cname }}" class="course-thumbnail">
+                        {% else %}
+                        <div class="course-thumbnail-placeholder">
+                            <i class="fas fa-book"></i>
                         </div>
-                        {% endfor %}
+                        {% endif %}
+                        <div class="course-info">
+                            <h3 class="course-title">{{ course.cname }}</h3>
+                            <p class="course-instructor">By {{ course.instructor.username }}</p>
+                            <div class="course-meta">
+                                <span class="rating">
+                                    <i class="fas fa-star"></i>
+                                    {{ course.average_rating|default:"0.0" }}
+                                </span>
+                                <span class="students">
+                                    <i class="fas fa-users"></i>
+                                    {{ course.enrolled_students.count }}
+                                </span>
+                            </div>
+                            <div class="course-price">
+                                {% if course.fee > 0 %}
+                                <span class="price">₹{{ course.fee }}</span>
+                                {% else %}
+                                <span class="price free">Free</span>
+                                {% endif %}
+                            </div>
+                            <a href="{% url 'courses:course_detail' course.course_id %}"
+                                class="btn btn-primary btn-sm">View Course</a>
+                        </div>
                     </div>
+                    {% endfor %}
                 </div>
+            </div>
             {% else %}
-                <div class="text-center py-5">
-                    <h3>No courses available yet</h3>
-                    <p class="text-muted">Check back later for new courses</p>
-                </div>
+            <div class="text-center py-5">
+                <h3>No courses available yet</h3>
+                <p class="text-muted">Check back later for new courses</p>
+            </div>
             {% endif %}
         </div>
     </section>
@@ -127,7 +125,8 @@
                             </ul>
                         </div>
                         <div class="pricing-cta">
-                            <a href="{% url 'courses:register' %}" class="btn btn-outline-purple btn-lg w-100">Start Learning</a>
+                            <a href="{% url 'courses:register' %}" class="btn btn-outline-purple btn-lg w-100">Start
+                                Learning</a>
                         </div>
                     </div>
                 </div>
@@ -180,476 +179,480 @@
                             </ul>
                         </div>
                         <div class="pricing-cta">
-                            <a href="{% url 'courses:pricing' %}" class="btn btn-outline-purple btn-lg w-100">Contact Sales</a>
+                            <a href="{% url 'courses:pricing' %}" class="btn btn-outline-purple btn-lg w-100">Contact
+                                Sales</a>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="text-center mt-4">
-                <a href="{% url 'courses:pricing' %}" class="btn btn-link text-purple">View full pricing details <i class="fas fa-arrow-right ms-2"></i></a>
+                <a href="{% url 'courses:pricing' %}" class="btn btn-link text-purple">View full pricing details <i
+                        class="fas fa-arrow-right ms-2"></i></a>
             </div>
         </div>
     </section>
 </div>
 
 <style>
-.home-page {
-    overflow-x: hidden;
-}
-
-/* Hero Section */
-.hero-section {
-    background: linear-gradient(135deg, #6f42c1 0%, #8a63d2 100%);
-    color: white;
-    padding: 3rem 0;
-    margin-bottom: 2rem;
-}
-
-.hero-title {
-    font-size: 2.2rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
-
-.hero-text {
-    font-size: 1.1rem;
-    opacity: 0.9;
-    margin-bottom: 1.5rem;
-}
-
-.hero-buttons {
-    margin-top: 2rem;
-}
-
-.hero-buttons .btn {
-    padding: 0.8rem 1.5rem;
-    font-weight: 500;
-    border-radius: 25px;
-    transition: all 0.3s ease;
-}
-
-.hero-buttons .btn-outline-light:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.hero-image {
-    text-align: center;
-    padding: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.hero-img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    object-fit: cover;
-}
-
-/* Top Content Section */
-.top-content {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    padding: 3rem 0;
-    width: 100%;
-    overflow: hidden;
-}
-
-.container-fluid {
-    max-width: 100%;
-    margin: 0 auto;
-}
-
-.section-title {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #212529;
-    margin: 0;
-}
-
-.courses-scroll-container {
-    position: relative;
-    overflow: hidden;
-    padding: 1rem 0;
-    margin: 0;
-}
-
-.courses-scroll {
-    display: flex;
-    gap: 1.5rem;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    padding: 1rem 1.5rem;
-    -webkit-overflow-scrolling: touch;
-}
-
-/* Hide scrollbar for Chrome, Safari and Opera */
-.courses-scroll::-webkit-scrollbar {
-    display: none;
-}
-
-/* Hide scrollbar for IE, Edge and Firefox */
-.courses-scroll {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-}
-
-.course-card {
-    flex: 0 0 260px;
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    position: relative;
-}
-
-.course-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-}
-
-.course-badge {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: #6f42c1;
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    z-index: 1;
-}
-
-.course-thumbnail {
-    width: 100%;
-    height: 130px;
-    object-fit: cover;
-}
-
-.course-thumbnail-placeholder {
-    width: 100%;
-    height: 130px;
-    background: #f8f9fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #6f42c1;
-    font-size: 1.5rem;
-}
-
-.course-info {
-    padding: 0.875rem;
-}
-
-.course-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-    color: #2c3e50;
-}
-
-.course-instructor {
-    font-size: 0.8rem;
-    color: #6c757d;
-    margin-bottom: 0.25rem;
-}
-
-.course-meta {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-    font-size: 0.8rem;
-    color: #6c757d;
-}
-
-.course-meta i {
-    color: #ffc107;
-    margin-right: 0.25rem;
-}
-
-.course-price {
-    margin-bottom: 1rem;
-}
-
-.price {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #2c3e50;
-}
-
-.price.free {
-    color: #28a745;
-}
-
-/* Categories Section */
-.categories-section {
-    padding: 2.5rem 0;
-    background: #f8f9fa;
-}
-
-.categories-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
-}
-
-.category-card {
-    background: white;
-    border-radius: 10px;
-    padding: 1.5rem;
-    text-align: center;
-    text-decoration: none;
-    color: #212529;
-    transition: transform 0.3s ease;
-}
-
-.category-card:hover {
-    transform: translateY(-5px);
-    color: #6f42c1;
-}
-
-.category-icon {
-    width: 50px;
-    height: 50px;
-    background: #f8f9fa;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
-    color: #6f42c1;
-    font-size: 1.25rem;
-}
-
-.category-card h3 {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
-}
-
-.category-card p {
-    color: #6c757d;
-    margin: 0;
-}
-
-@media (min-width: 1400px) {
-    .container-fluid {
-        padding: 0 2rem;
+    .home-page {
+        overflow-x: hidden;
     }
-    
-    .courses-scroll {
-        padding: 1rem 2rem;
-    }
-}
 
-@media (max-width: 768px) {
-    .container-fluid {
-        padding: 0 1rem;
-    }
-    
-    .courses-scroll {
-        padding: 1rem;
-    }
-    
-    .course-card {
-        flex: 0 0 220px;
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #6f42c1 0%, #8a63d2 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
     }
 
     .hero-title {
-        font-size: 1.8rem;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
     }
 
     .hero-text {
-        font-size: 1rem;
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 1.5rem;
     }
 
-    .course-thumbnail {
-        height: 110px;
-    }
-
-    .course-info {
-        padding: 0.75rem;
-    }
-
-    .categories-grid {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    .hero-buttons {
+        margin-top: 2rem;
     }
 
     .hero-buttons .btn {
-        display: block;
-        width: 100%;
-        margin-bottom: 1rem;
+        padding: 0.8rem 1.5rem;
+        font-weight: 500;
+        border-radius: 25px;
+        transition: all 0.3s ease;
     }
-    
-    .hero-buttons .btn:last-child {
-        margin-bottom: 0;
+
+    .hero-buttons .btn-outline-light:hover {
+        background-color: rgba(255, 255, 255, 0.1);
     }
 
     .hero-image {
-        margin-top: 2rem;
+        text-align: center;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-}
 
-.debug-info {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 1rem;
-    border-radius: 5px;
-    margin-bottom: 1rem;
-    color: white;
-    font-size: 0.875rem;
-}
-
-.debug-info p {
-    margin: 0;
-    padding: 0.25rem 0;
-}
-
-/* Pricing Section */
-.pricing-section {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    padding: 3rem 0;
-}
-
-.pricing-card {
-    background: white;
-    border-radius: 15px;
-    padding: 1.5rem;
-    height: 100%;
-    position: relative;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.pricing-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
-
-.pricing-card.featured {
-    border: 2px solid #6f42c1;
-    transform: scale(1.05);
-}
-
-.featured-badge {
-    position: absolute;
-    top: -12px;
-    right: 20px;
-    background: #6f42c1;
-    color: white;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.pricing-header {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid #e9ecef;
-}
-
-.pricing-header h3 {
-    color: #2c3e50;
-    font-size: 1.3rem;
-    margin-bottom: 0.875rem;
-}
-
-.pricing-header .price {
-    font-size: 2.2rem;
-    color: #6f42c1;
-    font-weight: 700;
-}
-
-.currency {
-    font-size: 1.5rem;
-    font-weight: 500;
-    vertical-align: super;
-}
-
-.period {
-    font-size: 1rem;
-    color: #6c757d;
-    font-weight: normal;
-}
-
-.pricing-features ul {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 2rem;
-}
-
-.pricing-features li {
-    padding: 0.5rem 0;
-    color: #6c757d;
-}
-
-.pricing-features i {
-    margin-right: 0.5rem;
-    width: 20px;
-}
-
-.pricing-features .fa-check {
-    color: #28a745;
-}
-
-.pricing-features .fa-times {
-    color: #dc3545;
-}
-
-.pricing-cta {
-    text-align: center;
-}
-
-.btn-purple {
-    background-color: #6f42c1;
-    border-color: #6f42c1;
-    color: white;
-}
-
-.btn-purple:hover {
-    background-color: #5a32a3;
-    border-color: #5a32a3;
-    color: white;
-}
-
-.btn-outline-purple {
-    color: #6f42c1;
-    border-color: #6f42c1;
-}
-
-.btn-outline-purple:hover {
-    background-color: #6f42c1;
-    color: white;
-}
-
-.text-purple {
-    color: #6f42c1;
-}
-
-@media (max-width: 992px) {
-    .pricing-card.featured {
-        transform: none;
+    .hero-img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        object-fit: cover;
     }
-    
+
+    /* Top Content Section */
+    .top-content {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 3rem 0;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .container-fluid {
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #212529;
+        margin: 0;
+    }
+
+    .courses-scroll-container {
+        position: relative;
+        overflow: hidden;
+        padding: 1rem 0;
+        margin: 0;
+    }
+
+    .courses-scroll {
+        display: flex;
+        gap: 1.5rem;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        padding: 1rem 1.5rem;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .courses-scroll::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .courses-scroll {
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
+    }
+
+    .course-card {
+        flex: 0 0 260px;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+    }
+
+    .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .course-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #6f42c1;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        z-index: 1;
+    }
+
+    .course-thumbnail {
+        width: 100%;
+        height: 130px;
+        object-fit: cover;
+    }
+
+    .course-thumbnail-placeholder {
+        width: 100%;
+        height: 130px;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6f42c1;
+        font-size: 1.5rem;
+    }
+
+    .course-info {
+        padding: 0.875rem;
+    }
+
+    .course-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #2c3e50;
+    }
+
+    .course-instructor {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 0.25rem;
+    }
+
+    .course-meta {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    .course-meta i {
+        color: #ffc107;
+        margin-right: 0.25rem;
+    }
+
+    .course-price {
+        margin-bottom: 1rem;
+    }
+
+    .price {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .price.free {
+        color: #28a745;
+    }
+
+    /* Categories Section */
+    .categories-section {
+        padding: 2.5rem 0;
+        background: #f8f9fa;
+    }
+
+    .categories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .category-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        text-decoration: none;
+        color: #212529;
+        transition: transform 0.3s ease;
+    }
+
+    .category-card:hover {
+        transform: translateY(-5px);
+        color: #6f42c1;
+    }
+
+    .category-icon {
+        width: 50px;
+        height: 50px;
+        background: #f8f9fa;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        color: #6f42c1;
+        font-size: 1.25rem;
+    }
+
+    .category-card h3 {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .category-card p {
+        color: #6c757d;
+        margin: 0;
+    }
+
+    @media (min-width: 1400px) {
+        .container-fluid {
+            padding: 0 2rem;
+        }
+
+        .courses-scroll {
+            padding: 1rem 2rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .container-fluid {
+            padding: 0 1rem;
+        }
+
+        .courses-scroll {
+            padding: 1rem;
+        }
+
+        .course-card {
+            flex: 0 0 220px;
+        }
+
+        .hero-title {
+            font-size: 1.8rem;
+        }
+
+        .hero-text {
+            font-size: 1rem;
+        }
+
+        .course-thumbnail {
+            height: 110px;
+        }
+
+        .course-info {
+            padding: 0.75rem;
+        }
+
+        .categories-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+
+        .hero-buttons .btn {
+            display: block;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .hero-buttons .btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .hero-image {
+            margin-top: 2rem;
+        }
+    }
+
+    .debug-info {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        border-radius: 5px;
+        margin-bottom: 1rem;
+        color: white;
+        font-size: 0.875rem;
+    }
+
+    .debug-info p {
+        margin: 0;
+        padding: 0.25rem 0;
+    }
+
+    /* Pricing Section */
     .pricing-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         padding: 3rem 0;
     }
-}
+
+    .pricing-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        height: 100%;
+        position: relative;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .pricing-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .pricing-card.featured {
+        border: 2px solid #6f42c1;
+        transform: scale(1.05);
+    }
+
+    .featured-badge {
+        position: absolute;
+        top: -12px;
+        right: 20px;
+        background: #6f42c1;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .pricing-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .pricing-header h3 {
+        color: #2c3e50;
+        font-size: 1.3rem;
+        margin-bottom: 0.875rem;
+    }
+
+    .pricing-header .price {
+        font-size: 2.2rem;
+        color: #6f42c1;
+        font-weight: 700;
+    }
+
+    .currency {
+        font-size: 1.5rem;
+        font-weight: 500;
+        vertical-align: super;
+    }
+
+    .period {
+        font-size: 1rem;
+        color: #6c757d;
+        font-weight: normal;
+    }
+
+    .pricing-features ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 2rem;
+    }
+
+    .pricing-features li {
+        padding: 0.5rem 0;
+        color: #6c757d;
+    }
+
+    .pricing-features i {
+        margin-right: 0.5rem;
+        width: 20px;
+    }
+
+    .pricing-features .fa-check {
+        color: #28a745;
+    }
+
+    .pricing-features .fa-times {
+        color: #dc3545;
+    }
+
+    .pricing-cta {
+        text-align: center;
+    }
+
+    .btn-purple {
+        background-color: #6f42c1;
+        border-color: #6f42c1;
+        color: white;
+    }
+
+    .btn-purple:hover {
+        background-color: #5a32a3;
+        border-color: #5a32a3;
+        color: white;
+    }
+
+    .btn-outline-purple {
+        color: #6f42c1;
+        border-color: #6f42c1;
+    }
+
+    .btn-outline-purple:hover {
+        background-color: #6f42c1;
+        color: white;
+    }
+
+    .text-purple {
+        color: #6f42c1;
+    }
+
+    @media (max-width: 992px) {
+        .pricing-card.featured {
+            transform: none;
+        }
+
+        .pricing-section {
+            padding: 3rem 0;
+        }
+    }
 </style>
 
 <script>
-function scrollCourses(direction) {
-    const container = document.querySelector('.courses-scroll-wrapper');
-    const scrollAmount = 300; // Adjust this value to control scroll distance
-    
-    if (direction === 'left') {
-        container.scrollLeft -= scrollAmount;
-    } else {
-        container.scrollLeft += scrollAmount;
+    function scrollCourses(direction) {
+        const container = document.querySelector('.courses-scroll-wrapper');
+        const scrollAmount = 300; // Adjust this value to control scroll distance
+
+        if (direction === 'left') {
+            container.scrollLeft -= scrollAmount;
+        } else {
+            container.scrollLeft += scrollAmount;
+        }
     }
-}
 </script>
-{% endblock %} 
+{% endblock %}
